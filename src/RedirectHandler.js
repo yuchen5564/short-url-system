@@ -42,7 +42,7 @@ const RedirectHandler = () => {
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <div className="text-center">
         <Spinner animation="border" role="status" className="mb-3" />
-        <p className="h5">重定向中...</p>
+        <p className="h5">Redirecting...</p>
       </div>
     </Container>
   );
