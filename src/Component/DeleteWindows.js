@@ -6,6 +6,7 @@ import { db } from '../firebaseAuth/firebase';
 
 function DeleteWindows(props) {
     const docId = props.doc ? props.doc.id : '';
+    const docDescription = props.doc ? props.doc.description : '';
 
     const del = async () => {
         await deleteDoc(doc(db, 'urlInfo', docId));
@@ -21,7 +22,7 @@ function DeleteWindows(props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Delete ({props.doc.description})
+                    Delete ({docDescription})
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

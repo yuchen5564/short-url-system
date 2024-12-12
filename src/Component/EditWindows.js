@@ -7,6 +7,7 @@ import { db } from '../firebaseAuth/firebase';
 
 function EditWindows(props) {
     const docId = props.doc ? props.doc.id : '';
+    const docDescription = props.doc ? props.doc.description : '';
     const [description, setDescription] = useState("");
     const [shortCode, setShortCode] = useState("");
     const [originalUrl, setOriginalUrl] = useState("");
@@ -41,7 +42,7 @@ function EditWindows(props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Edit ({props.doc.description})
+                    Edit ({docDescription})
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
