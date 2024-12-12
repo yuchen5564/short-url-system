@@ -9,7 +9,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import List from './List';
 import Create from './Create';
 import RedirectHandler from './RedirectHandler';
-// import NotFound from './NotFound';
+import NotFound from './NotFound';
 // import News from './News';
 import { AuthProvider } from "./firebaseAuth/AuthProvider";
 import ProtectedRoutes from "./Component/ProtectedRoutes"; // Adjust path if necessary
@@ -29,7 +29,8 @@ root.render(
       </Route>
       {/* <Route exact path='/news' element={<News />} /> */}
       {/* <Route exact path='/login' element={<Login />} /> */}
-      {/* <Route path='*' element={<NotFound />} /> */}
+      <Route path='*' element={<NotFound />} />
+      <Route path='/404' element={<NotFound />} />
     </Routes>
     </AuthProvider>
   </BrowserRouter>

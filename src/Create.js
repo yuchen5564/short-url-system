@@ -6,10 +6,9 @@ import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import './Component/main.css';
-import { useState, useRef } from "react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, doc, setDoc, serverTimestamp, updateDoc, addDoc, getDoc } from "firebase/firestore";
-import { db, storage } from './firebaseAuth/firebase';
+import { useState } from "react";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from './firebaseAuth/firebase';
 import dayjs from 'dayjs';
 
 const generateRandomCode = () => {
