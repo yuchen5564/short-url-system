@@ -21,7 +21,7 @@ function DeleteWindows(props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Delete ({docId})
+                    Delete ({props.doc.description})
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

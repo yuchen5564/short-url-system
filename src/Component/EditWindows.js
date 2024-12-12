@@ -41,7 +41,7 @@ function EditWindows(props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Edit ({docId})
+                    Edit ({props.doc.description})
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
