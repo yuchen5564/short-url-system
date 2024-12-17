@@ -64,7 +64,7 @@ function List() {
                                     <th>Action</th>
                                     <th>Description</th>
                                     <th>Shorten URL</th>
-                                    <th>Post Time</th>
+                                    <th>Create Time</th>
                                 </tr>
                             </thead>
                             <tbody>
