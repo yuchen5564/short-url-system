@@ -1,10 +1,7 @@
-import Table from 'react-bootstrap/Table';
 import Navb from './Component/Navb';
 import { Container } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
-import * as Icon from 'react-bootstrap-icons';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from './firebaseAuth/firebase';
@@ -14,6 +11,8 @@ import EditWindows from './Component/EditWindows';
 
 import './Component/main.css';
 
+import Box from '@mui/material/Box';
+import { DataGrid } from '@mui/x-data-grid';
 
 function List() {
     const [deleteModalShow, setDeleteModalShow] = useState(false);
@@ -51,6 +50,20 @@ function List() {
         }
     };
 
+    const columns = [
+        { field: 'description', headerName: 'Description', width: 200 },
+        { 
+            field: 'shortCode', 
+            headerName: 'Shorten URL', 
+            width: 300,
+            renderCell: (params) => {
+                const fullUrl = `https://s.merlinkuo.tw/${params.value}`;
+                return (fullUrl);
+            }
+        },
+        { field: 'ptime', headerName: 'Create Time', width: 200 },
+    ];
+
     return (
         <>
             <Navb />
@@ -58,46 +71,27 @@ function List() {
                 <Row className='justify-content-center'>
                     <Col md={10}>
                         <h1 style={{ 'fontFamily': 'Inter-sb' }}>List</h1><br />
-                        <Table striped border hover responsive>
-                            <thead>
-                                <tr>
-                                    <th>Action</th>
-                                    <th>Description</th>
-                                    <th>Shorten URL</th>
-                                    <th>Create Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {urlList?.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>
-                                            <Button variant="outline-primary" onClick={() => handleEditShow(item)}>
-                                                <Icon.PencilSquare />
-                                            </Button>{' '}
-                                            <Button variant="outline-danger" onClick={() => handleDeleteShow(item)}>
-                                                <Icon.Trash />
-                                            </Button>
-                                        </td>
-                                        <td>{item.description}</td> 
-                                        <td>https://s.merlinkuo.tw/{item.shortCode}</td>  
-                                        <td>{item.ptime}</td> 
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+                        <Box sx={{ height: 400, width: '100%' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <DataGrid
+                                    rows={urlList}
+                                    columns={columns}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: {
+                                                pageSize: 5,
+                                            },
+                                        },
+                                    }}
+                                    pageSizeOptions={[5,10,15,20]}
+                                    checkboxSelection
+                                    disableRowSelectionOnClick
+                                />
+                            </div>
+                        </Box>
                     </Col>
                 </Row>
             </Container>
-            <DeleteWindows
-                show={deleteModalShow}
-                onHide={() => setDeleteModalShow(false)}
-                doc={document}
-            />
-            <EditWindows
-                show={editModalShow}
-                onHide={() => setEditModalShow(false)}
-                doc={document}
-            />
         </>
     );
 }
