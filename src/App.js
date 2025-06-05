@@ -1,76 +1,126 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
-import { Layout, message } from 'antd';
+import { message } from 'antd';
 import 'antd/dist/reset.css';
-import './Component/styles/main.css'; // 引入主樣式檔案
+import './Component/styles/main.css';
 
-// 導入組件
-import NavigationHeader from './Component/NavigationHeader';
-import HeroSection from './Component/HeroSection';
-import StatisticsCards from './Component/StatisticsCards';
-import FeatureCards from './Component/FeatureCards';
-import UsageSteps from './Component/UsageSteps';
-import AppFooter from './Component/AppFooter';
-import { AuthCard, LoginForm, RegisterForm } from './Component/AuthForms';
-import DashboardSidebar from './Component/DashboardSidebar';
-import DashboardHeader from './Component/DashboardHeader';
-import UrlForm from './Component/UrlForm';
-import UrlTable from './Component/UrlTable';
-import { ActivityPanel } from './Component/ActivityLists';
+// 導入頁面組件
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import LoadingPage from './pages/LoadingPage';
 
-// 圖標
-import { LinkOutlined, RocketOutlined } from '@ant-design/icons';
+// 導入模態框組件
+import LogoutModal from './Component/LogoutModal';
+import UserProfileModal from './Component/UserProfileModal';
 
-// Firebase Auth
+// Firebase
+import { auth, db } from './firebaseAuth/firebase';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { collection, getDocs, query, orderBy, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { signIn } from './firebaseAuth/firebase';
-import AuthContext from "./firebaseAuth/AuthContext";
-
-const { Content } = Layout;
 
 const App = () => {
+  // 頁面狀態
   const [currentPage, setCurrentPage] = useState('home');
+  const [authLoading, setAuthLoading] = useState(true);
+  
+  // 用戶狀態
   const [user, setUser] = useState(null);
+  const [firebaseUser, setFirebaseUser] = useState(null);
+  
+  // UI狀態
   const [collapsed, setCollapsed] = useState(false);
   const [activeKey, setActiveKey] = useState('overview');
   const [loading, setLoading] = useState(false);
+  
+  // 模態框狀態
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
 
-  // 模擬數據
-  const [urls, setUrls] = useState([
-    {
-      id: 1,
-      originalUrl: 'https://www.example.com/very-long-article-title-here',
-      shortUrl: 'https://short.ly/abc123',
-      alias: 'abc123',
-      clicks: 1247,
-      createdAt: '2024-01-15',
-      lastClicked: '2024-01-20',
-      status: 'active'
-    },
-    {
-      id: 2,
-      originalUrl: 'https://github.com/user/repository-name',
-      shortUrl: 'https://short.ly/gh456',
-      alias: 'gh456',
-      clicks: 856,
-      createdAt: '2024-01-18',
-      lastClicked: '2024-01-19',
-      status: 'active'
-    },
-    {
-      id: 3,
-      originalUrl: 'https://docs.google.com/document/d/123456789',
-      shortUrl: 'https://short.ly/doc789',
-      alias: 'doc789',
-      clicks: 432,
-      createdAt: '2024-01-20',
-      lastClicked: '2024-01-21',
-      status: 'active'
+  // 數據狀態
+  const [urls, setUrls] = useState([]);
+
+  // Firebase 身分驗證狀態監聽
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase Auth State Changed:', firebaseUser);
+      setAuthLoading(false);
+      
+      if (firebaseUser) {
+        // 用戶已登入
+        setFirebaseUser(firebaseUser);
+        const userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          avatar: firebaseUser.photoURL,
+          emailVerified: firebaseUser.emailVerified,
+          loginTime: new Date().toISOString()
+        };
+        
+        setUser(userData);
+        localStorage.setItem('shortlink_user', JSON.stringify(userData));
+        
+        // 如果在登入或註冊頁面，跳轉到儀表板
+        if (currentPage === 'login' || currentPage === 'register') {
+          setCurrentPage('dashboard');
+        }
+        
+        // 載入用戶的 URL 數據
+        fetchUserUrls();
+      } else {
+        // 用戶未登入
+        setFirebaseUser(null);
+        setUser(null);
+        setUrls([]);
+        localStorage.removeItem('shortlink_user');
+        
+        // 如果在需要登入的頁面，跳轉到首頁
+        if (currentPage === 'dashboard') {
+          setCurrentPage('home');
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [currentPage]);
+
+  // 載入用戶的 URL 數據
+  const fetchUserUrls = async () => {
+    if (!firebaseUser) return;
+    
+    try {
+      const urlsQuery = query(
+        collection(db, "urlInfo"), 
+        orderBy('ptime', 'desc')
+      );
+      const querySnapshot = await getDocs(urlsQuery);
+      const urlsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        shortUrl: `https://s.merlinkuo.tw/${doc.data().shortCode}`,
+        alias: doc.data().shortCode,
+        clicks: doc.data().clicks || 0,
+        createdAt: doc.data().ptime,
+        status: 'active'
+      }));
+      
+      setUrls(urlsData);
+      console.log('載入 URLs:', urlsData);
+    } catch (error) {
+      console.error('載入 URLs 失敗:', error);
+      message.error('載入數據失敗');
     }
-  ]);
+  };
 
+  // 計算統計數據
   const stats = {
     totalUrls: urls.length,
-    totalClicks: urls.reduce((sum, url) => sum + url.clicks, 0),
+    totalClicks: urls.reduce((sum, url) => sum + (url.clicks || 0), 0),
     todayClicks: 234,
     activeUsers: 1847,
     trends: {
@@ -85,24 +135,18 @@ const App = () => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      // 這裡整合 Firebase Auth
       console.log('登入資訊:', values);
       
-      // 模擬登入
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-      const res = await signIn(values.email, values.password);
-      if (res.error) {
-        throw new Error(res.error);
+      const result = await signIn(values.email, values.password);
+      if (result.error) {
+        throw new Error(result.error);
       }
       
-      setUser({ 
-        email: values.email, 
-        name: values.email.split('@')[0] 
-      });
-      setCurrentPage('dashboard');
-      message.success('登入成功！');
+      message.success('登入成功！歡迎回來');
+      // Firebase onAuthStateChanged 會自動處理後續邏輯
     } catch (error) {
-      message.error('登入失敗');
+      console.error('登入錯誤:', error);
+      message.error('登入失敗：' + error.message);
     } finally {
       setLoading(false);
     }
@@ -112,44 +156,135 @@ const App = () => {
   const handleRegister = async (values) => {
     setLoading(true);
     try {
-      // 這裡整合 Firebase Auth
       console.log('註冊資訊:', values);
       
-      // 模擬註冊
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 創建新用戶
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        values.email, 
+        values.password
+      );
       
-      message.success('註冊成功！請登入您的帳號');
-      setCurrentPage('login');
+      // 更新用戶顯示名稱
+      await updateProfile(userCredential.user, {
+        displayName: values.name
+      });
+      
+      message.success('註冊成功！歡迎加入 ShortLink');
+      // Firebase onAuthStateChanged 會自動處理後續邏輯
     } catch (error) {
-      message.error('註冊失敗');
+      console.error('註冊錯誤:', error);
+      let errorMessage = '註冊失敗';
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = '此信箱已被註冊';
+          break;
+        case 'auth/weak-password':
+          errorMessage = '密碼強度不足，請使用至少6個字符';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = '信箱格式不正確';
+          break;
+        default:
+          errorMessage = error.message;
+      }
+      
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // 處理新增短網址
-  const handleCreateUrl = (values) => {
-    const newUrl = {
-      id: urls.length + 1,
-      originalUrl: values.originalUrl,
-      shortUrl: `https://short.ly/${values.customAlias || 'auto' + Math.random().toString(36).substr(2, 6)}`,
-      alias: values.customAlias || 'auto' + Math.random().toString(36).substr(2, 6),
-      clicks: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastClicked: null,
-      status: 'active'
-    };
-    
-    setUrls([...urls, newUrl]);
-    message.success('短網址創建成功！');
-    setActiveKey('links');
+  // 處理登出
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      console.log('用戶登出:', user?.email);
+      
+      await signOut(auth);
+      
+      // 清除本地狀態
+      setActiveKey('overview');
+      setCollapsed(false);
+      
+      message.success('已成功登出');
+    } catch (error) {
+      console.error('登出錯誤:', error);
+      message.error('登出失敗，請稍後再試');
+    } finally {
+      setLogoutLoading(false);
+      setShowLogoutModal(false);
+    }
   };
 
-  // 處理刪除網址
-  const handleDeleteUrl = (id) => {
-    setUrls(urls.filter(url => url.id !== id));
-    message.success('短網址已刪除');
+  // 處理用戶資料更新
+  const handleUpdateProfile = async (values) => {
+    setProfileLoading(true);
+    try {
+      console.log('更新用戶資料:', values);
+      
+      if (firebaseUser) {
+        // 更新 Firebase 用戶資料
+        await updateProfile(firebaseUser, {
+          displayName: values.name
+        });
+      }
+      
+      // 更新本地狀態
+      const updatedUser = { ...user, ...values };
+      setUser(updatedUser);
+      localStorage.setItem('shortlink_user', JSON.stringify(updatedUser));
+      
+      message.success('個人資料更新成功');
+      setShowProfileModal(false);
+    } catch (error) {
+      console.error('更新資料錯誤:', error);
+      message.error('更新失敗，請稍後再試');
+    } finally {
+      setProfileLoading(false);
+    }
   };
+
+  // 處理新增短網址 - 簡化版本，因為 UrlForm 現在直接處理 Firestore
+  const handleCreateUrl = async (urlData) => {
+    // UrlForm 組件現在直接處理 Firestore 操作
+    // 這個函數主要用於更新 UI 狀態和重新載入數據
+    
+    try {
+      // 重新載入用戶的 URL 數據以反映新創建的項目
+      await fetchUserUrls();
+      
+      // 可選：切換到連結列表頁面查看新創建的項目
+      setTimeout(() => {
+        setActiveKey('links');
+      }, 1500);
+      
+    } catch (error) {
+      console.error('更新數據失敗:', error);
+    }
+  };
+
+    // 處理刪除網址
+    const handleDeleteUrl = async (id) => {
+      if (!firebaseUser) {
+        message.error('請先登入');
+        return;
+      }
+
+      try {
+        // 從 Firestore 刪除
+        await deleteDoc(doc(db, "urlInfo", id));
+        
+        // 更新本地狀態
+        setUrls(urls.filter(url => url.id !== id));
+        
+        message.success('短網址已刪除');
+      } catch (error) {
+        console.error('刪除短網址錯誤:', error);
+        message.error('刪除失敗，請稍後再試');
+      }
+    };
 
   // 首頁快速創建
   const handleQuickCreate = (url) => {
@@ -159,222 +294,132 @@ const App = () => {
       return;
     }
     
-    const newUrl = {
-      id: urls.length + 1,
-      originalUrl: url,
-      shortUrl: `https://short.ly/quick${Math.random().toString(36).substr(2, 6)}`,
-      alias: `quick${Math.random().toString(36).substr(2, 6)}`,
-      clicks: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastClicked: null,
-      status: 'active'
-    };
-    
-    setUrls([...urls, newUrl]);
-    message.success('短網址創建成功！');
+    // 跳轉到創建頁面
+    setActiveKey('create');
+    setCurrentPage('dashboard');
+    message.info('請在創建頁面完成設定');
   };
 
-  // 頁面標題對應
-  const getPageTitle = () => {
-    const titles = {
-      'overview': '儀表板總覽',
-      'create': '新增短網址',
-      'links': '我的連結',
-      'analytics': '分析報告',
-      'settings': '系統設置'
-    };
-    return titles[activeKey] || '儀表板';
+  // 處理通知點擊
+  const handleNotificationClick = () => {
+    message.info('通知功能開發中...');
   };
 
-  // 首頁
-  const HomePage = () => (
-    <Layout className="app-layout">
-      <NavigationHeader 
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-      />
-      
-      <Content style={{ marginTop: 64, padding: 0 }}>
-        <HeroSection 
-          onCreateUrl={handleQuickCreate}
-          onRegister={() => setCurrentPage('register')}
-        />
-        
-        <div className="stats-section stats-section--homepage">
-          <StatisticsCards 
-            stats={{
-              totalUrls: 2847293,
-              totalClicks: 18472841,
-              activeUsers: 89374
-            }}
-            layout="grid"
-            showTrends={false}
-          />
-        </div>
-        
-        <FeatureCards />
-        
-        <UsageSteps 
-          onGetStarted={() => setCurrentPage('register')}
-        />
-      </Content>
-
-      <AppFooter />
-    </Layout>
-  );
-
-  // 登入頁面
-  const LoginPage = () => (
-    <Layout className="app-layout">
-      <NavigationHeader 
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-      />
-      
-      <AuthCard
-        title="歡迎回來"
-        subtitle="登入您的 ShortLink 帳號"
-        icon={<LinkOutlined style={{ color: 'white', fontSize: 24 }} />}
-      >
-        <LoginForm
-          onSubmit={handleLogin}
-          onSwitchToRegister={() => setCurrentPage('register')}
-          loading={loading}
-        />
-      </AuthCard>
-    </Layout>
-  );
-
-  // 註冊頁面
-  const RegisterPage = () => (
-    <Layout className="app-layout">
-      <NavigationHeader 
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-      />
-      
-      <AuthCard
-        title="開始您的旅程"
-        subtitle="創建 ShortLink 帳號，免費使用所有功能"
-        icon={<RocketOutlined style={{ color: 'white', fontSize: 24 }} />}
-      >
-        <RegisterForm
-          onSubmit={handleRegister}
-          onSwitchToLogin={() => setCurrentPage('login')}
-          loading={loading}
-        />
-      </AuthCard>
-    </Layout>
-  );
-
-  // 儀表板頁面
-  const DashboardPage = () => {
-    const renderContent = () => {
-      switch (activeKey) {
-        case 'overview':
-          return (
-            <div className="content-container">
-              <StatisticsCards stats={stats} />
-              <div className="activity-panel">
-                <ActivityPanel 
-                  urls={urls}
-                  onViewMoreActivity={() => setActiveKey('links')}
-                  onViewMorePopular={() => setActiveKey('analytics')}
-                />
-              </div>
-            </div>
-          );
-          
-        case 'create':
-          return (
-            <div className="content-container">
-              <div className="content-card content-card--form">
-                <UrlForm onSubmit={handleCreateUrl} />
-              </div>
-            </div>
-          );
-          
-        case 'links':
-          return (
-            <div className="content-container">
-              <div className="url-table-container">
-                <UrlTable 
-                  urls={urls}
-                  onDelete={handleDeleteUrl}
-                  onView={(record) => console.log('查看:', record)}
-                />
-              </div>
-            </div>
-          );
-          
-        case 'analytics':
-          return (
-            <div className="content-container">
-              <div className="content-card content-card--center">
-                <h2>分析功能開發中</h2>
-                <p>詳細的點擊分析、地理位置統計、設備分析等功能正在開發中...</p>
-              </div>
-            </div>
-          );
-          
-        case 'settings':
-          return (
-            <div className="content-container">
-              <div className="content-card content-card--center">
-                <h2>系統設置</h2>
-                <p>帳戶設置、域名配置、API設置等功能正在開發中...</p>
-              </div>
-            </div>
-          );
-          
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <Layout className="dashboard-layout">
-        <DashboardSidebar
-          collapsed={collapsed}
-          activeKey={activeKey}
-          onMenuClick={({ key }) => setActiveKey(key)}
-        />
-        
-        <Layout>
-          <DashboardHeader
-            collapsed={collapsed}
-            onToggleCollapse={() => setCollapsed(!collapsed)}
-            title={getPageTitle()}
-            user={user}
-          />
-          
-          <Content className="dashboard-content">
-            {renderContent()}
-          </Content>
-        </Layout>
-      </Layout>
-    );
+  // 處理設置點擊
+  const handleSettingsClick = () => {
+    setActiveKey('settings');
   };
+
+  // 如果正在檢查身分驗證狀態，顯示載入畫面
+  if (authLoading) {
+    return <LoadingPage message="檢查登入狀態中..." />;
+  }
 
   // 根據當前頁面和用戶狀態渲染
   const renderPage = () => {
-    if (user && currentPage !== 'home') {
-      return <DashboardPage />;
+    // 如果用戶已登入且試圖訪問登入/註冊頁面，重定向到儀表板
+    if (user && (currentPage === 'login' || currentPage === 'register')) {
+      return (
+        <DashboardPage
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          activeKey={activeKey}
+          setActiveKey={setActiveKey}
+          user={user}
+          urls={urls}
+          stats={stats}
+          onCreateUrl={handleCreateUrl}  // 確保傳入這個函數
+          onDeleteUrl={handleDeleteUrl}
+          onNotificationClick={handleNotificationClick}
+          onLogout={() => setShowLogoutModal(true)}
+          onProfile={() => setShowProfileModal(true)}
+          onSettings={handleSettingsClick}
+        />
+      );
+    }
+
+    // 如果用戶未登入且試圖訪問儀表板，重定向到首頁
+    if (!user && currentPage === 'dashboard') {
+      return (
+        <HomePage
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          onQuickCreate={handleQuickCreate}
+        />
+      );
     }
 
     switch (currentPage) {
       case 'login':
-        return <LoginPage />;
+        return (
+          <LoginPage
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onLogin={handleLogin}
+            loading={loading}
+          />
+        );
       case 'register':
-        return <RegisterPage />;
+        return (
+          <RegisterPage
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onRegister={handleRegister}
+            loading={loading}
+          />
+        );
       case 'dashboard':
-        return user ? <DashboardPage /> : <HomePage />;
+        return (
+          <DashboardPage
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
+            activeKey={activeKey}
+            setActiveKey={setActiveKey}
+            user={user}
+            urls={urls}
+            stats={stats}
+            onCreateUrl={handleCreateUrl}  // 確保傳入這個函數
+            onDeleteUrl={handleDeleteUrl}
+            onNotificationClick={handleNotificationClick}
+            onLogout={() => setShowLogoutModal(true)}
+            onProfile={() => setShowProfileModal(true)}
+            onSettings={handleSettingsClick}
+          />
+        );
       default:
-        return <HomePage />;
+        return (
+          <HomePage
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onQuickCreate={handleQuickCreate}
+          />
+        );
     }
   };
 
-  return renderPage();
+  return (
+    <>
+      {renderPage()}
+      
+      {/* 登出確認彈窗 */}
+      <LogoutModal
+        visible={showLogoutModal}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        loading={logoutLoading}
+        userName={user?.name}
+      />
+      
+      {/* 用戶資料彈窗 */}
+      <UserProfileModal
+        visible={showProfileModal}
+        onCancel={() => setShowProfileModal(false)}
+        onUpdate={handleUpdateProfile}
+        user={user}
+        loading={profileLoading}
+      />
+    </>
+  );
 };
 
 export default App;

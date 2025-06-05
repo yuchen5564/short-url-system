@@ -4,14 +4,15 @@ import {
   Form, 
   Input, 
   Button, 
-  DatePicker, 
   Space, 
-  Row, 
-  Col, 
   Typography, 
-  Card 
+  Card,
+  message 
 } from 'antd';
 import { PlusOutlined, CopyOutlined } from '@ant-design/icons';
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from '../firebaseAuth/firebase';
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -20,15 +21,99 @@ const UrlForm = ({
   onSubmit, 
   loading = false, 
   showPreview = true,
-  layout = 'vertical' 
+  layout = 'vertical',
+  user // 新增用戶資訊 prop
 }) => {
   const [form] = Form.useForm();
   const [previewUrl, setPreviewUrl] = useState('');
   const [customAlias, setCustomAlias] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [shortUrl, setShortUrl] = useState('');
+  const [pastOriginalUrl, setPastOriginalUrl] = useState('');
 
-  const handleSubmit = (values) => {
-    if (onSubmit) {
-      onSubmit(values);
+  // 生成隨機代碼
+  const generateRandomCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  // 檢查短代碼是否已存在
+  const checkCodeExists = async (code) => {
+    const urlRef = doc(db, 'urlInfo', code);
+    const urlSnap = await getDoc(urlRef);
+    return urlSnap.exists();
+  };
+
+  // 處理表單提交
+  const handleSubmit = async (values) => {
+    if (!user) {
+      message.error('請先登入');
+      return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+      const today = new Date();
+      const datePost = dayjs(today).format('YYYY/MM/DD HH:mm:ss');
+      
+      let code = values.shortCode || generateRandomCode();
+
+      // 如果是自訂代碼，檢查是否已存在
+      if (values.shortCode) {
+        const exists = await checkCodeExists(values.shortCode);
+        if (exists) {
+          throw new Error('此代碼已被使用，請嘗試其他代碼');
+        }
+      } else {
+        // 如果是自動生成，確保不重複
+        while (await checkCodeExists(code)) {
+          code = generateRandomCode();
+        }
+      }
+
+      // 創建 Firestore 文檔
+      const docRef = doc(db, "urlInfo", code);
+      await setDoc(docRef, {
+        ptime: datePost,
+        description: values.description || '',
+        shortCode: code,
+        originalUrl: values.originalUrl,
+        // userId: user.uid,
+        // userEmail: user.email,
+        // clicks: 0
+      });
+
+      // 設置成功狀態
+      setSuccess(true);
+      setShortUrl(`https://s.merlinkuo.tw/${code}`);
+      setPastOriginalUrl(values.originalUrl);
+      
+      // 呼叫父組件的 onSubmit（如果需要更新列表等）
+      if (onSubmit) {
+        onSubmit({
+          ...values,
+          shortCode: code,
+          shortUrl: `https://s.merlinkuo.tw/${code}`,
+          ptime: datePost
+        });
+      }
+
+      message.success('短網址創建成功！');
+      
+      // 清除表單
+      resetForm();
+      
+    } catch (error) {
+      console.error('創建短網址失敗:', error);
+      message.error(`創建失敗：${error.message}`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -41,18 +126,73 @@ const UrlForm = ({
     setCustomAlias(e.target.value);
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success('已複製到剪貼簿');
+    } catch (err) {
+      message.error('複製失敗');
+    }
   };
 
   const resetForm = () => {
     form.resetFields();
     setPreviewUrl('');
     setCustomAlias('');
+    setSuccess(false);
+    setShortUrl('');
+    setPastOriginalUrl('');
   };
 
   return (
     <div>
+      {/* 成功創建提示 */}
+      {success && (
+        <Card 
+          className="mb-24"
+          style={{ 
+            background: '#f6ffed', 
+            border: '1px solid #b7eb8f',
+            marginBottom: 24
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <Text strong style={{ color: '#52c41a', fontSize: '16px' }}>
+              🎉 短網址創建成功！
+            </Text>
+            <div style={{ marginTop: 12 }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                background: 'white',
+                padding: '12px 16px',
+                borderRadius: 8,
+                border: '1px solid #d9d9d9'
+              }}>
+                <div>
+                  <Text strong style={{ color: '#1890ff' }}>
+                    {shortUrl}
+                  </Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    原網址：{pastOriginalUrl}
+                  </Text>
+                </div>
+                <Button
+                  type="primary"
+                  icon={<CopyOutlined />}
+                  onClick={() => copyToClipboard(shortUrl)}
+                  size="small"
+                >
+                  複製
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Form
         form={form}
         layout={layout}
@@ -61,11 +201,37 @@ const UrlForm = ({
           if (changedValues.originalUrl !== undefined) {
             setPreviewUrl(changedValues.originalUrl || '');
           }
-          if (changedValues.customAlias !== undefined) {
-            setCustomAlias(changedValues.customAlias || '');
+          if (changedValues.shortCode !== undefined) {
+            setCustomAlias(changedValues.shortCode || '');
           }
         }}
       >
+        <Form.Item
+          label="描述"
+          name="description"
+          rules={[
+            { required: true, message: '請輸入連結描述' }
+          ]}
+        >
+          <Input 
+            placeholder="關於此連結的描述" 
+            size="large"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="短代碼（選填）"
+          name="shortCode"
+          extra="留空將自動生成 6 位隨機代碼"
+        >
+          <Input 
+            addonBefore="https://s.merlinkuo.tw/" 
+            placeholder="your-custom-code" 
+            size="large"
+            onChange={handleAliasChange}
+          />
+        </Form.Item>
+
         <Form.Item
           label="原始網址"
           name="originalUrl"
@@ -78,41 +244,6 @@ const UrlForm = ({
             placeholder="https://example.com/your-long-url" 
             size="large"
             onChange={handleUrlChange}
-          />
-        </Form.Item>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="自訂別名"
-              name="customAlias"
-            >
-              <Input 
-                addonBefore="short.ly/" 
-                placeholder="my-custom-link" 
-                size="large"
-                onChange={handleAliasChange}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="到期日期"
-              name="expiryDate"
-            >
-              <DatePicker style={{ width: '100%' }} size="large" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item
-          label="描述"
-          name="description"
-        >
-          <TextArea 
-            placeholder="為此連結添加描述..." 
-            rows={3}
-            size="large"
           />
         </Form.Item>
 
@@ -130,13 +261,13 @@ const UrlForm = ({
                   <Text strong style={{ color: '#52c41a' }}>預覽：</Text>
                   <br />
                   <Text code style={{ color: '#1890ff' }}>
-                    https://short.ly/{customAlias || 'auto-generated'}
+                    https://s.merlinkuo.tw/{customAlias || 'auto-generated'}
                   </Text>
                 </div>
                 <Button
                   type="text"
                   icon={<CopyOutlined />}
-                  onClick={() => copyToClipboard(`https://short.ly/${customAlias || 'auto-generated'}`)}
+                  onClick={() => copyToClipboard(`https://s.merlinkuo.tw/${customAlias || 'auto-generated'}`)}
                 />
               </div>
             </Card>
@@ -150,19 +281,33 @@ const UrlForm = ({
               htmlType="submit" 
               size="large" 
               icon={<PlusOutlined />}
-              loading={loading}
+              loading={submitting || loading}
             >
               創建短網址
             </Button>
             <Button 
               size="large" 
               onClick={resetForm}
+              disabled={submitting}
             >
               清除
             </Button>
           </Space>
         </Form.Item>
       </Form>
+
+      {/* 使用提示 */}
+      <Card 
+        title="使用提示" 
+        size="small"
+        style={{ marginTop: 24, background: '#fafafa' }}
+      >
+        <div style={{ fontSize: '14px', color: '#666' }}>
+          <p><strong>描述：</strong>幫助您記住此連結的用途</p>
+          <p><strong>短代碼：</strong>自訂易記的代碼，留空將自動生成</p>
+          <p><strong>原始網址：</strong>要縮短的完整網址，必須包含 http:// 或 https://</p>
+        </div>
+      </Card>
     </div>
   );
 };

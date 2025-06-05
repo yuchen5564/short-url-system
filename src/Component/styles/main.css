@@ -320,6 +320,736 @@ body {
 }
 
 /* =========================
+   用戶區域樣式
+========================= */
+.user-avatar-container {
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.user-avatar-container:hover {
+  background-color: #f5f5f5;
+}
+
+.user-name {
+  color: #333;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================
+   登出確認樣式
+========================= */
+.logout-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.logout-warning__icon {
+  color: #faad14;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.logout-warning__content {
+  flex: 1;
+}
+
+.logout-warning__title {
+  font-weight: 600;
+  color: #d46b08;
+  margin-bottom: 4px;
+}
+
+.logout-warning__text {
+  color: #d46b08;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* =========================
+   模態框樣式
+========================= */
+.profile-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.profile-modal .ant-upload {
+  display: block;
+}
+
+.avatar-upload-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-upload-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.avatar-upload-overlay:hover {
+  background: #f5f5f5;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* =========================
+   通知樣式
+========================= */
+.notification-badge {
+  position: relative;
+}
+
+.notification-badge::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.notification-button {
+  position: relative;
+  padding: 8px !important;
+  border-radius: 8px !important;
+}
+
+.notification-button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* =========================
+   內容區域樣式
+========================= */
+.content-container {
+  padding: 24px;
+}
+
+.content-card {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.content-card--center {
+  text-align: center;
+}
+
+.content-card--form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* =========================
+   表單樣式
+========================= */
+.url-form {
+  margin-top: 16px;
+}
+
+.url-preview {
+  margin-bottom: 24px;
+}
+
+.preview-card {
+  background: #f6ffed !important;
+  border: 1px solid #b7eb8f !important;
+}
+
+.preview-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-text {
+  color: #52c41a !important;
+  font-weight: 500 !important;
+}
+
+.preview-url {
+  color: #1890ff !important;
+}
+
+/* =========================
+   表格樣式
+========================= */
+.url-table-container {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.url-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.url-link {
+  color: #1890ff !important;
+  font-weight: 500 !important;
+}
+
+.url-original {
+  font-size: 12px !important;
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+/* =========================
+   活動面板樣式
+========================= */
+.activity-panel {
+  margin-top: 24px;
+}
+
+.rank-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.rank-avatar--gold { background-color: #faad14 !important; }
+.rank-avatar--silver { background-color: #d9d9d9 !important; }
+.rank-avatar--bronze { background-color: #fa8c16 !important; }
+.rank-avatar--default { background-color: #1890ff !important; }
+
+/* =========================
+   底部樣式
+========================= */
+.app-footer {
+  text-align: center;
+  background: #001529 !important;
+  color: white !important;
+  padding: 40px 50px !important;
+}
+
+.footer-links {
+  margin-bottom: 20px;
+}
+
+.footer-link {
+  color: white !important;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.footer-link:hover {
+  opacity: 1 !important;
+  color: white !important;
+}
+
+.footer-copyright {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+/* =========================
+   響應式設計
+========================= */
+@media (max-width: 768px) {
+  .navigation-header {
+    padding: 0 20px;
+  }
+  
+  .hero-section {
+    padding: 60px 20px;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem !important;
+  }
+  
+  .stats-section,
+  .features-section,
+  .steps-section {
+    padding: 60px 20px;
+  }
+  
+  .stats-grid {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .auth-container {
+    padding: 20px;
+  }
+  
+  .auth-card {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .content-container {
+    padding: 16px;
+  }
+  
+  .content-card {
+    padding: 20px;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .header-title {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .stat-value {
+    font-size: 2rem !important;
+  }
+  
+  .feature-icon {
+    font-size: 36px;
+  }
+
+  .dashboard-header {
+    padding: 0 12px !important;
+  }
+
+  .header-toggle {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .auth-card {
+    padding: 24px;
+  }
+}
+
+/* =========================
+   動畫效果
+========================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+/* =========================
+   工具類別
+========================= */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+
+.p-8 { padding: 8px; }
+.p-16 { padding: 16px; }
+.p-24 { padding: 24px; }
+.p-32 { padding: 32px; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+.flex { display: flex; }
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cursor-pointer { cursor: pointer; }
+
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+.rounded-lg { border-radius: 8px; }
+.rounded-xl { border-radius: 12px; }
+.rounded-2xl { border-radius: 16px; }
+
+.nav-brand__title {
+  margin: 0;
+  color: #1890ff;
+}
+
+/* =========================
+   Hero Section 樣式
+========================= */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 100px 50px;
+  text-align: center;
+  color: white;
+}
+
+.hero-title {
+  color: white !important;
+  font-size: 3.5rem !important;
+  margin-bottom: 24px !important;
+}
+
+.hero-subtitle {
+  color: rgba(255,255,255,0.9) !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 40px !important;
+  max-width: 600px;
+  margin: 0 auto 40px !important;
+}
+
+.hero-input-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hero-input {
+  border-radius: 8px !important;
+  height: 50px !important;
+}
+
+.hero-hint {
+  color: rgba(255,255,255,0.8) !important;
+  font-size: 0.9rem !important;
+}
+
+/* =========================
+   統計區域樣式
+========================= */
+.stats-section {
+  padding: 80px 50px;
+  background: white;
+}
+
+.stats-section--homepage {
+  text-align: center;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem !important;
+}
+
+.stat-value--blue { color: #1890ff !important; }
+.stat-value--green { color: #52c41a !important; }
+.stat-value--purple { color: #722ed1 !important; }
+.stat-value--orange { color: #fa8c16 !important; }
+
+/* =========================
+   功能卡片樣式
+========================= */
+.features-section {
+  padding: 80px 50px;
+  background: #fafafa;
+}
+
+.features-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.features-title {
+  margin-bottom: 16px;
+}
+
+.features-subtitle {
+  font-size: 1.1rem !important;
+  color: #666 !important;
+  max-width: 600px;
+  margin: 0 auto !important;
+}
+
+.feature-card {
+  text-align: center;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.feature-icon--blue { color: #1890ff; }
+.feature-icon--green { color: #52c41a; }
+.feature-icon--purple { color: #722ed1; }
+
+/* =========================
+   使用步驟樣式
+========================= */
+.steps-section {
+  padding: 80px 50px;
+  background: white;
+}
+
+.steps-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.steps-cta {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.cta-button {
+  height: 50px !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+  border-radius: 8px !important;
+}
+
+/* =========================
+   認證頁面樣式
+========================= */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 50px;
+  background: #f8fafc;
+}
+
+.auth-card {
+  width: 400px;
+  padding: 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-logo {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #1890ff, #722ed1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.auth-title {
+  margin-bottom: 8px !important;
+}
+
+.auth-subtitle {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.auth-features {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #b7eb8f;
+}
+
+.auth-features__title {
+  color: #52c41a !important;
+  font-weight: 500 !important;
+}
+
+.auth-features__item {
+  font-size: 0.9rem !important;
+  color: #666 !important;
+}
+
+/* =========================
+   儀表板樣式
+========================= */
+.dashboard-layout {
+  min-height: 100vh;
+}
+
+.dashboard-sidebar {
+  background: white;
+}
+
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-title {
+  margin: 0 !important;
+  color: #1890ff !important;
+}
+
+.sidebar-menu {
+  border-right: 0 !important;
+}
+
+.dashboard-header {
+  padding: 0 24px !important;
+  background: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-toggle {
+  font-size: 16px !important;
+  width: 64px !important;
+  height: 64px !important;
+}
+
+.header-title {
+  margin: 0 !important;
+  margin-left: 16px !important;
+}
+
+.dashboard-content {
+  background: #f0f2f5 !important;
+}
+
+/* =========================
    內容區域樣式
 ========================= */
 .content-container {
