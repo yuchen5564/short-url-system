@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
+    "antd": "^5.25.4",
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
     "dayjs": "^1.11.13",

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseAuth/firebase"; // Ensure your firebase config and auth are set up correctly
-import Navb from './Navb';
+// import Navb from './Navb';
 import Spinner from 'react-bootstrap/Spinner';
 import { Container } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
@@ -24,7 +24,7 @@ const ProtectedRoutes = () => {
 
     if (loading) {
       return <>
-      <Navb></Navb>
+      {/* <Navb></Navb> */}
       <Container fluid className='mt-5'>
         <Row className='justify-content-center'>
             <Col md={1}>

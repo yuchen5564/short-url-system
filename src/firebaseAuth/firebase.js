@@ -28,6 +28,7 @@ const storage = getStorage(app);
 
 const signIn = async (email, password) => {
     try {
+      console.log("Signing in with email:", email);
         const userCredential = await signInWithEmailAndPassword(
             auth,
             email,
@@ -36,6 +37,7 @@ const signIn = async (email, password) => {
         const user = userCredential.user;
         return true
     } catch (error) {
+      console.error("Error signing in:", error);
         return { error: error.message }
     }
 };

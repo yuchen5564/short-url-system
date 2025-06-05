@@ -1,5 +1,5 @@
 import { Container } from 'react-bootstrap';
-import './Component/main.css';
+import './Component/styles/main.css';
 
 function NotFound() {
     return (
