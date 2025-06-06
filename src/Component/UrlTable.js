@@ -8,7 +8,8 @@ import {
   DeleteOutlined,
   SearchOutlined,
   FilterOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons';
 import UrlDetailModal from './UrlDetailModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -155,7 +156,7 @@ const UrlTable = ({
             <Button 
               type="text" 
               size="small" 
-              icon={<EyeOutlined />}
+              icon={<InfoCircleOutlined style={{ fontSize: '18px', color: '#08c' }} />}
               onClick={() => handleView(record)}
             />
           </Tooltip>
@@ -163,7 +164,7 @@ const UrlTable = ({
             <Button 
               type="text" 
               size="small" 
-              icon={<ExportOutlined />}
+              icon={<ExportOutlined style={{ fontSize: '18px' }} />}
               onClick={() => window.open(record.originalUrl, '_blank')}
             />
           </Tooltip>
@@ -171,7 +172,7 @@ const UrlTable = ({
             <Button 
               type="text" 
               size="small" 
-              icon={<DeleteOutlined />}
+              icon={<DeleteOutlined style={{ fontSize: '18px' }} />}
               danger
               onClick={() => handleDeleteClick(record)}
             />
