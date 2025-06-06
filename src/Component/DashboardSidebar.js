@@ -6,7 +6,7 @@ import {
   PlusOutlined,
   LinkOutlined,
   BarChartOutlined,
-  SettingOutlined
+  SettingOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -42,7 +42,7 @@ const DashboardSidebar = ({
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: '設置',
+      label: '設定',
     },
   ];
 
@@ -67,7 +67,7 @@ const DashboardSidebar = ({
             color: theme === 'light' ? '#1890ff' : 'white' 
           }}
         >
-          {collapsed ? 'SL' : 'ShortLink'}
+          {collapsed ? <LinkOutlined /> : 'Short Link'}
         </Title>
       </div>
       

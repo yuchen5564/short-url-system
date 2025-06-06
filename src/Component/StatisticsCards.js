@@ -5,7 +5,8 @@ import {
   LinkOutlined, 
   RiseOutlined, 
   BarChartOutlined, 
-  TeamOutlined 
+  TeamOutlined,
+  FieldTimeOutlined 
 } from '@ant-design/icons';
 
 const { Text } = Typography;
@@ -38,26 +39,33 @@ const StatisticsCards = ({
       color: '#1890ff',
       trend: data.trends?.totalUrls || 12
     },
+    // {
+    //   title: '總點擊數',
+    //   value: data.totalClicks,
+    //   icon: RiseOutlined,
+    //   color: '#52c41a',
+    //   trend: data.trends?.totalClicks || 8
+    // },
+    // {
+    //   title: '今日點擊',
+    //   value: data.todayClicks,
+    //   icon: BarChartOutlined,
+    //   color: '#722ed1',
+    //   trend: data.trends?.todayClicks || -3
+    // },
+    // {
+    //   title: '活躍用戶',
+    //   value: data.activeUsers,
+    //   icon: TeamOutlined,
+    //   color: '#fa8c16',
+    //   trend: data.trends?.activeUsers || 15
+    // },
     {
-      title: '總點擊數',
-      value: data.totalClicks,
-      icon: RiseOutlined,
-      color: '#52c41a',
-      trend: data.trends?.totalClicks || 8
-    },
-    {
-      title: '今日點擊',
-      value: data.todayClicks,
-      icon: BarChartOutlined,
-      color: '#722ed1',
-      trend: data.trends?.todayClicks || -3
-    },
-    {
-      title: '活躍用戶',
-      value: data.activeUsers,
-      icon: TeamOutlined,
+      title: 'More Dashboard Features',
+      value: 'Coming Soon ',
+      icon: FieldTimeOutlined,
       color: '#fa8c16',
-      trend: data.trends?.activeUsers || 15
+      trend: " ∞ "
     }
   ];
 
@@ -67,13 +75,13 @@ const StatisticsCards = ({
         title={item.title}
         value={item.value}
         prefix={<item.icon style={{ color: item.color }} />}
-        suffix={
-          showTrends && (
-            <Text type={item.trend > 0 ? 'success' : 'danger'}>
-              {item.trend > 0 ? '+' : ''}{item.trend}%
-            </Text>
-          )
-        }
+        // suffix={
+        //   showTrends && (
+        //     <Text type={item.trend > 0 ? 'success' : 'danger'}>
+        //       {item.trend > 0 ? '+' : ''}{item.trend}%
+        //     </Text>
+        //   )
+        // }
       />
     </Card>
   );

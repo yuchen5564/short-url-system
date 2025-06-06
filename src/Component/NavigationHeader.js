@@ -23,7 +23,7 @@ const NavigationHeader = ({
           <LinkOutlined style={{ color: 'white', fontSize: 20 }} />
         </div>
         <Title level={3} className="nav-brand__title">
-          ShortLink
+          Short Link
         </Title>
       </div>
       

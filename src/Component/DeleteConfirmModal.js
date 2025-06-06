@@ -96,12 +96,12 @@ const DeleteConfirmModal = ({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
+            {/* <div>
               <Text type="secondary">點擊數：</Text>
               <Tag color="blue" style={{ marginLeft: 8 }}>
                 {urlData.clicks || 0} 次
               </Tag>
-            </div>
+            </div> */}
             <div>
               <Text type="secondary">建立時間：</Text>
               <Text style={{ marginLeft: 8, fontSize: '12px' }}>

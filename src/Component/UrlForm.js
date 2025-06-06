@@ -89,7 +89,7 @@ const UrlForm = ({
         // clicks: 0
       });
 
-      // 設置成功狀態
+      // 設定成功狀態
       setSuccess(true);
       setShortUrl(`https://s.merlinkuo.tw/${code}`);
       setPastOriginalUrl(values.originalUrl);

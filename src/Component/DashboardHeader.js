@@ -37,7 +37,7 @@ const DashboardHeader = ({
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: '帳戶設置',
+      label: '帳戶設定',
       onClick: onSettings
     },
     {

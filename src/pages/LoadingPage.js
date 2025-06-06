@@ -11,7 +11,7 @@ const LoadingPage = ({ message = "載入中..." }) => {
           <div className="auth-logo mb-16">
             <LinkOutlined style={{ color: 'white', fontSize: 24 }} />
           </div>
-          <h3 style={{ marginBottom: 16 }}>ShortLink</h3>
+          <h3 style={{ marginBottom: 16 }}>Short Link</h3>
           <Spin size="large" />
           <p style={{ marginTop: 16, color: '#666' }}>{message}</p>
         </div>

@@ -33,7 +33,7 @@ const DashboardPage = ({
       'create': '新增短網址',
       'links': '我的連結',
       'analytics': '分析報告',
-      'settings': '系統設置'
+      'settings': '系統設定'
     };
     return titles[activeKey] || '儀表板';
   };
@@ -91,8 +91,8 @@ const DashboardPage = ({
         return (
           <div className="content-container">
             <div className="content-card content-card--center">
-              <h2>系統設置</h2>
-              <p>帳戶設置、域名配置、API設置等功能正在開發中...</p>
+              <h2>系統設定</h2>
+              <p>帳戶設定、域名配置、API設定等功能正在開發中...</p>
             </div>
           </div>
         );

@@ -148,8 +148,9 @@ const UrlDetailModal = ({
       }
     >
       <div>
+      <br />
         {/* 基本資訊卡片 */}
-        <Card size="small" style={{ marginBottom: 16, background: '#f8f9fa' }}>
+        {/* <Card size="small" style={{ marginBottom: 16, background: '#f8f9fa' }}>
           <Row gutter={16}>
             <Col span={12}>
               <Statistic
@@ -166,7 +167,7 @@ const UrlDetailModal = ({
               />
             </Col>
           </Row>
-        </Card>
+        </Card> */}
 
         {/* 短網址資訊 */}
         <div style={{ marginBottom: 24 }}>
@@ -281,14 +282,14 @@ const UrlDetailModal = ({
         <div>
           <Title level={5}>其他資訊</Title>
           <Row gutter={[16, 8]}>
-            <Col span={12}>
+            {/* <Col span={12}>
               <Text type="secondary">建立者：</Text>
               <Text>{urlData.userEmail || 'N/A'}</Text>
             </Col>
             <Col span={12}>
               <Text type="secondary">狀態：</Text>
               <Tag color="green">活躍</Tag>
-            </Col>
+            </Col> */}
             <Col span={12}>
               <Text type="secondary">建立時間：</Text>
               <Text>{urlData.ptime || 'N/A'}</Text>

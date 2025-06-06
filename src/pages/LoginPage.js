@@ -20,7 +20,7 @@ const LoginPage = ({
       
       <AuthCard
         title="歡迎回來"
-        subtitle="登入您的 ShortLink 帳號"
+        subtitle="登入您的 Short Link 帳號"
         icon={<LinkOutlined style={{ color: 'white', fontSize: 24 }} />}
       >
         <LoginForm

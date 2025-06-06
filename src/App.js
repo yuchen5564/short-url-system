@@ -63,7 +63,7 @@ const App = () => {
         };
         
         setUser(userData);
-        localStorage.setItem('shortlink_user', JSON.stringify(userData));
+        // localStorage.setItem('Short Link_user', JSON.stringify(userData));
         
         // 如果在登入或註冊頁面，跳轉到儀表板
         // if (currentPage === 'login' || currentPage === 'register') {
@@ -78,7 +78,7 @@ const App = () => {
         setFirebaseUser(null);
         setUser(null);
         setUrls([]);
-        localStorage.removeItem('shortlink_user');
+        // localStorage.removeItem('Short Link_user');
         
         // 如果在需要登入的頁面，跳轉到首頁
         if (currentPage === 'dashboard') {
@@ -171,7 +171,7 @@ const App = () => {
         displayName: values.name
       });
       
-      message.success('註冊成功！歡迎加入 ShortLink');
+      message.success('註冊成功！歡迎加入 Short Link');
       // Firebase onAuthStateChanged 會自動處理後續邏輯
     } catch (error) {
       console.error('註冊錯誤:', error);
@@ -235,7 +235,7 @@ const App = () => {
       // 更新本地狀態
       const updatedUser = { ...user, ...values };
       setUser(updatedUser);
-      localStorage.setItem('shortlink_user', JSON.stringify(updatedUser));
+      // localStorage.setItem('Short Link_user', JSON.stringify(updatedUser));
       
       message.success('個人資料更新成功');
       setShowProfileModal(false);
@@ -308,7 +308,7 @@ const App = () => {
     message.info('通知功能開發中...');
   };
 
-  // 處理設置點擊
+  // 處理設定點擊
   const handleSettingsClick = () => {
     setActiveKey('settings');
   };

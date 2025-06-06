@@ -29,11 +29,15 @@ const UrlTable = ({
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   
+  // 添加分頁狀態管理
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     notification.success({
       message: '複製成功',
-      description: '短網址已複製到剪貼板',
+      description: '短網址已複製到剪貼簿',
       placement: 'topRight'
     });
   };
@@ -71,12 +75,29 @@ const UrlTable = ({
     setSelectedUrl(null);
   };
 
+  // 處理分頁變化
+  const handleTableChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
+  // 處理頁面大小變化
+  const handleShowSizeChange = (current, size) => {
+    setCurrentPage(1); // 切換頁面大小時重置到第一頁
+    setPageSize(size);
+  };
+
   // 過濾數據
   const filteredUrls = urls.filter(url => 
     (url.originalUrl && url.originalUrl.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (url.shortCode && url.shortCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (url.description && url.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // 當搜尋條件改變時重置到第一頁
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const columns = [
     {
@@ -110,16 +131,16 @@ const UrlTable = ({
         </div>
       ),
     },
-    {
-      title: '點擊數',
-      dataIndex: 'clicks',
-      key: 'clicks',
-      width: '15%',
-      sorter: (a, b) => (a.clicks || 0) - (b.clicks || 0),
-      render: (clicks) => (
-        <Tag color="blue">{clicks ? clicks.toLocaleString() : 0}</Tag>
-      ),
-    },
+    // {
+    //   title: '點擊數',
+    //   dataIndex: 'clicks',
+    //   key: 'clicks',
+    //   width: '15%',
+    //   sorter: (a, b) => (a.clicks || 0) - (b.clicks || 0),
+    //   render: (clicks) => (
+    //     <Tag color="blue">{clicks ? clicks.toLocaleString() : 0}</Tag>
+    //   ),
+    // },
     {
       title: '建立時間',
       dataIndex: 'ptime',
@@ -138,14 +159,14 @@ const UrlTable = ({
         </div>
       ),
     },
-    {
-      title: '狀態',
-      key: 'status',
-      width: '10%',
-      render: () => (
-        <Tag color="green">活躍</Tag>
-      ),
-    },
+    // {
+    //   title: '狀態',
+    //   key: 'status',
+    //   width: '10%',
+    //   render: () => (
+    //     <Tag color="green">活躍</Tag>
+    //   ),
+    // },
     {
       title: '操作',
       key: 'actions',
@@ -183,12 +204,15 @@ const UrlTable = ({
   ];
 
   const paginationConfig = pagination ? {
+    current: currentPage,
+    pageSize: pageSize,
     total: filteredUrls.length,
-    pageSize: 10,
     showSizeChanger: true,
     showQuickJumper: true,
-    showTotal: (total) => `共 ${total} 條記錄`,
-    pageSizeOptions: ['10', '20', '50', '100']
+    showTotal: (total, range) => `顯示 ${range[0]}-${range[1]} 項，共 ${total} 條記錄`,
+    pageSizeOptions: ['10', '20', '50', '100'],
+    onChange: handleTableChange,
+    onShowSizeChange: handleShowSizeChange
   } : false;
 
   return (
@@ -226,8 +250,6 @@ const UrlTable = ({
       </Row>
 
       {/* 數據表格 */}
-
-      {/* 數據表格 */}
       <Table
         columns={columns}
         dataSource={filteredUrls}
@@ -250,7 +272,8 @@ const UrlTable = ({
           textAlign: 'center' 
         }}>
           <Text type="secondary">
-            總共 {urls.length} 個短網址，累計點擊 {urls.reduce((sum, url) => sum + (url.clicks || 0), 0)} 次
+            總共 {urls.length} 個短網址
+            {/* ，累計點擊 {urls.reduce((sum, url) => sum + (url.clicks || 0), 0)} 次 */}
           </Text>
         </div>
       )}

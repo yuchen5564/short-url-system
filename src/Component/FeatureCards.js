@@ -11,7 +11,7 @@ const { Title, Paragraph } = Typography;
 
 const FeatureCards = ({ 
   features,
-  title = "為什麼選擇 ShortLink？",
+  title = "為什麼選擇 Short Link？",
   subtitle = "我們提供企業級的短網址服務，幫助您更好地管理和分析您的連結"
 }) => {
   const defaultFeatures = [

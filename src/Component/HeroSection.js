@@ -23,7 +23,7 @@ const HeroSection = ({
       </Title>
       
       <Paragraph className="hero-subtitle">
-        使用 ShortLink 創建專業的短網址，追蹤點擊數據，提升您的數位行銷效果
+        使用 Short Link 創建專業的短網址，追蹤點擊數據，提升您的數位行銷效果
       </Paragraph>
       
       <Space direction="vertical" size="large" className="hero-input-container">
@@ -45,7 +45,7 @@ const HeroSection = ({
         />
         
         <Text className="hero-hint">
-          免費試用，無需註冊 • 支援自訂別名 • 詳細分析報告
+          支援自訂別名
         </Text>
       </Space>
     </div>

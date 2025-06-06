@@ -1,21 +1,24 @@
 // src/Component/AppFooter.js
 import React from 'react';
 import { Layout, Space, Typography } from 'antd';
+import dayjs from 'dayjs';
 
 const { Footer } = Layout;
 const { Text } = Typography;
 
+const currentYear = dayjs().year();
+
 const AppFooter = ({ 
   links,
-  copyright = "© 2024 ShortLink. 版權所有",
+  copyright = `Copyright ©2024-${currentYear} Short Link. All Rights Reserved.`,
   background = "#001529",
   textColor = "white"
 }) => {
   const defaultLinks = [
-    { label: '服務條款', href: '/terms' },
-    { label: '隱私政策', href: '/privacy' },
-    { label: 'API 文檔', href: '/api' },
-    { label: '聯絡我們', href: '/contact' }
+    { label: '服務條款', href: '/' },
+    { label: '隱私政策', href: '/' },
+    { label: 'API 文檔', href: '/' },
+    { label: '聯絡我們', href: '/' }
   ];
 
   const footerLinks = links || defaultLinks;

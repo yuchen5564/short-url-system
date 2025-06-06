@@ -28,7 +28,7 @@ const HomePage = ({
           onRegister={() => setCurrentPage('register')}
         />
         
-        <div className="stats-section stats-section--homepage">
+        {/* <div className="stats-section stats-section--homepage">
           <StatisticsCards 
             stats={{
               totalUrls: 2847293,
@@ -38,9 +38,9 @@ const HomePage = ({
             layout="grid"
             showTrends={false}
           />
-        </div>
+        </div> */}
         
-        <FeatureCards />
+        {/* <FeatureCards /> */}
         
         <UsageSteps 
           onGetStarted={() => setCurrentPage('register')}
