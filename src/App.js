@@ -66,10 +66,11 @@ const App = () => {
         localStorage.setItem('shortlink_user', JSON.stringify(userData));
         
         // 如果在登入或註冊頁面，跳轉到儀表板
-        if (currentPage === 'login' || currentPage === 'register') {
-          setCurrentPage('dashboard');
-        }
-        
+        // if (currentPage === 'login' || currentPage === 'register') {
+        //   setCurrentPage('dashboard');
+        // }
+
+        setCurrentPage('dashboard');
         // 載入用戶的 URL 數據
         fetchUserUrls();
       } else {
@@ -265,26 +266,28 @@ const App = () => {
     }
   };
 
-    // 處理刪除網址
-    const handleDeleteUrl = async (id) => {
-      if (!firebaseUser) {
-        message.error('請先登入');
-        return;
-      }
+  // 處理刪除網址 - 更新版本，包含 Firestore 操作
+  const handleDeleteUrl = async (id) => {
+    if (!firebaseUser) {
+      message.error('請先登入');
+      return;
+    }
+  
+    try {
+      // 從 Firestore 刪除
+      await deleteDoc(doc(db, "urlInfo", id));
+      
+      // 更新本地狀態
+      setUrls(prevUrls => prevUrls.filter(url => url.id !== id));
+      
+      message.success('短網址已刪除');
+    } catch (error) {
+      console.error('刪除短網址錯誤:', error);
+      message.error('刪除失敗，請稍後再試');
+      throw error; // 重新拋出錯誤，讓 UrlTable 知道操作失敗
+    }
+  };
 
-      try {
-        // 從 Firestore 刪除
-        await deleteDoc(doc(db, "urlInfo", id));
-        
-        // 更新本地狀態
-        setUrls(urls.filter(url => url.id !== id));
-        
-        message.success('短網址已刪除');
-      } catch (error) {
-        console.error('刪除短網址錯誤:', error);
-        message.error('刪除失敗，請稍後再試');
-      }
-    };
 
   // 首頁快速創建
   const handleQuickCreate = (url) => {
@@ -309,6 +312,18 @@ const App = () => {
   const handleSettingsClick = () => {
     setActiveKey('settings');
   };
+
+  const handleUpdateUrl = (updatedData) => {
+    // 更新本地狀態中的 URL 數據
+    setUrls(prevUrls => 
+      prevUrls.map(url => 
+        url.id === updatedData.id ? updatedData : url
+      )
+    );
+    
+    console.log('URL 資料已更新:', updatedData);
+  };
+  
 
   // 如果正在檢查身分驗證狀態，顯示載入畫面
   if (authLoading) {

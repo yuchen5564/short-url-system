@@ -1,5 +1,5 @@
 // src/Component/UrlTable.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, Button, Space, Tag, Tooltip, Typography, notification, Input, Row, Col } from 'antd';
 import { 
   CopyOutlined, 
@@ -10,17 +10,23 @@ import {
   FilterOutlined,
   DownloadOutlined
 } from '@ant-design/icons';
+import UrlDetailModal from './UrlDetailModal';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 const { Text } = Typography;
 
 const UrlTable = ({ 
   urls = [], 
   onDelete, 
-  onView, 
+  onUpdate,
   loading = false,
   pagination = true 
 }) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedUrl, setSelectedUrl] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -31,16 +37,37 @@ const UrlTable = ({
     });
   };
 
-  const handleDelete = (id) => {
-    if (onDelete) {
-      onDelete(id);
+  const handleView = (record) => {
+    setSelectedUrl(record);
+    setShowDetailModal(true);
+  };
+
+  const handleDeleteClick = (record) => {
+    setSelectedUrl(record);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedUrl || !onDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      await onDelete(selectedUrl.id);
+      setShowDeleteModal(false);
+      setSelectedUrl(null);
+    } catch (error) {
+      console.error('刪除失敗:', error);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
-  const handleView = (record) => {
-    if (onView) {
-      onView(record);
+  const handleUpdate = (updatedData) => {
+    if (onUpdate) {
+      onUpdate(updatedData);
     }
+    setShowDetailModal(false);
+    setSelectedUrl(null);
   };
 
   // 過濾數據
@@ -58,6 +85,10 @@ const UrlTable = ({
       width: '40%',
       render: (text, record) => (
         <div>
+          <Text type="secondary" style={{ fontSize: '20px' }}>
+            {record.description || '無描述'}
+          </Text>
+          <br />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Text strong style={{ color: '#1890ff' }}>
               https://s.merlinkuo.tw/{text}
@@ -69,10 +100,6 @@ const UrlTable = ({
               onClick={() => copyToClipboard(`https://s.merlinkuo.tw/${text}`)}
             />
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.description || '無描述'}
-          </Text>
-          <br />
           <Text type="secondary" style={{ fontSize: '11px' }}>
             {record.originalUrl && record.originalUrl.length > 60 ? 
               record.originalUrl.substring(0, 60) + '...' : 
@@ -146,7 +173,7 @@ const UrlTable = ({
               size="small" 
               icon={<DeleteOutlined />}
               danger
-              onClick={() => handleDelete(record.id)}
+              onClick={() => handleDeleteClick(record)}
             />
           </Tooltip>
         </Space>
@@ -198,6 +225,8 @@ const UrlTable = ({
       </Row>
 
       {/* 數據表格 */}
+
+      {/* 數據表格 */}
       <Table
         columns={columns}
         dataSource={filteredUrls}
@@ -224,6 +253,80 @@ const UrlTable = ({
           </Text>
         </div>
       )}
+
+      {/* 詳細資料模態框 */}
+      <UrlDetailModal
+        visible={showDetailModal}
+        onCancel={() => {
+          setShowDetailModal(false);
+          setSelectedUrl(null);
+        }}
+        urlData={selectedUrl}
+        onUpdate={handleUpdate}
+      />
+
+      {/* 刪除確認模態框 */}
+      <DeleteConfirmModal
+        visible={showDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setSelectedUrl(null);
+        }}
+        urlData={selectedUrl}
+        loading={deleteLoading}
+      />
+
+      {/* 數據表格 */}
+      <Table
+        columns={columns}
+        dataSource={filteredUrls}
+        loading={loading}
+        pagination={paginationConfig}
+        rowKey="id"
+        scroll={{ x: 800 }}
+        locale={{
+          emptyText: searchTerm ? '沒有找到符合條件的連結' : '還沒有創建任何短網址'
+        }}
+      />
+
+      {/* 統計資訊 */}
+      {urls.length > 0 && (
+        <div style={{ 
+          marginTop: 16, 
+          padding: 16, 
+          background: '#fafafa', 
+          borderRadius: 8,
+          textAlign: 'center' 
+        }}>
+          <Text type="secondary">
+            總共 {urls.length} 個短網址，累計點擊 {urls.reduce((sum, url) => sum + (url.clicks || 0), 0)} 次
+          </Text>
+        </div>
+      )}
+
+      {/* 詳細資料模態框 */}
+      <UrlDetailModal
+        visible={showDetailModal}
+        onCancel={() => {
+          setShowDetailModal(false);
+          setSelectedUrl(null);
+        }}
+        urlData={selectedUrl}
+        onUpdate={handleUpdate}
+      />
+
+      {/* 刪除確認模態框 */}
+      <DeleteConfirmModal
+        visible={showDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setSelectedUrl(null);
+        }}
+        urlData={selectedUrl}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

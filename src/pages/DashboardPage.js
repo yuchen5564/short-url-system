@@ -20,6 +20,7 @@ const DashboardPage = ({
   stats,
   onCreateUrl,
   onDeleteUrl,
+  onUpdateUrl,  // 新增這個 prop
   onNotificationClick,
   onLogout,
   onProfile,
@@ -58,9 +59,7 @@ const DashboardPage = ({
         return (
           <div className="content-container">
             <div className="content-card content-card--form">
-              <UrlForm onSubmit={onCreateUrl}
-                user
-              />
+              <UrlForm onSubmit={onCreateUrl} />
             </div>
           </div>
         );
