@@ -59,7 +59,10 @@ const DashboardPage = ({
         return (
           <div className="content-container">
             <div className="content-card content-card--form">
-              <UrlForm onSubmit={onCreateUrl} />
+              <UrlForm 
+               onSubmit={onCreateUrl}
+               user
+               />
             </div>
           </div>
         );
