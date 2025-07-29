@@ -269,8 +269,15 @@ body {
   min-height: 100vh;
 }
 
-.dashboard-sidebar {
-  background: white;
+/* 修正 Ant Design Sider 的固定定位 */
+.dashboard-layout .ant-layout-sider {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+  overflow-y: auto;
+  background: #fff;
 }
 
 .sidebar-header {
@@ -290,13 +297,21 @@ body {
   border-right: 0 !important;
 }
 
-.dashboard-header {
+/* 修正 Header 定位 */
+.dashboard-layout .ant-layout .ant-layout-header {
   padding: 0 24px !important;
   background: #fff !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #f0f0f0 !important;
+  position: fixed !important;
+  top: 0;
+  right: 0;
+  left: 200px;
+  z-index: 99;
+  transition: left 0.2s;
+  height: 64px;
 }
 
 .header-left {
@@ -315,8 +330,22 @@ body {
   margin-left: 16px !important;
 }
 
-.dashboard-content {
+/* 修正 Content 區域 */
+.dashboard-layout .ant-layout .ant-layout-content {
   background: #f0f2f5 !important;
+  margin-left: 200px;
+  margin-top: 64px;
+  transition: margin-left 0.2s;
+  min-height: calc(100vh - 64px);
+}
+
+/* Sidebar 收合時的樣式 */
+.dashboard-layout .ant-layout-sider-collapsed ~ .ant-layout .ant-layout-header {
+  left: 80px !important;
+}
+
+.dashboard-layout .ant-layout-sider-collapsed ~ .ant-layout .ant-layout-content {
+  margin-left: 80px !important;
 }
 
 /* =========================
@@ -625,6 +654,24 @@ body {
   .header-title {
     font-size: 1.2rem !important;
   }
+
+  /* 移動端的儀表板樣式調整 */
+  .dashboard-layout .ant-layout .ant-layout-header {
+    left: 0 !important;
+  }
+  
+  .dashboard-layout .ant-layout .ant-layout-content {
+    margin-left: 0 !important;
+  }
+  
+  .dashboard-layout .ant-layout-sider {
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  
+  .dashboard-layout .ant-layout-sider:not(.ant-layout-sider-collapsed) {
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 480px) {
@@ -644,13 +691,18 @@ body {
     font-size: 36px;
   }
 
-  .dashboard-header {
+  .dashboard-layout .ant-layout .ant-layout-header {
     padding: 0 12px !important;
+    left: 0 !important;
   }
 
   .header-toggle {
     width: 48px !important;
     height: 48px !important;
+  }
+
+  .dashboard-layout .ant-layout .ant-layout-content {
+    margin-left: 0 !important;
   }
 
   .auth-card {
@@ -785,462 +837,6 @@ body {
 .rounded-xl { border-radius: 12px; }
 .rounded-2xl { border-radius: 16px; }
 
-.nav-brand__title {
-  margin: 0;
-  color: #1890ff;
-}
-
-/* =========================
-   Hero Section 樣式
-========================= */
-.hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 100px 50px;
-  text-align: center;
-  color: white;
-}
-
-.hero-title {
-  color: white !important;
-  font-size: 3.5rem !important;
-  margin-bottom: 24px !important;
-}
-
-.hero-subtitle {
-  color: rgba(255,255,255,0.9) !important;
-  font-size: 1.2rem !important;
-  margin-bottom: 40px !important;
-  max-width: 600px;
-  margin: 0 auto 40px !important;
-}
-
-.hero-input-container {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.hero-input {
-  border-radius: 8px !important;
-  height: 50px !important;
-}
-
-.hero-hint {
-  color: rgba(255,255,255,0.8) !important;
-  font-size: 0.9rem !important;
-}
-
-/* =========================
-   統計區域樣式
-========================= */
-.stats-section {
-  padding: 80px 50px;
-  background: white;
-}
-
-.stats-section--homepage {
-  text-align: center;
-}
-
-.stats-grid {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 2.5rem !important;
-}
-
-.stat-value--blue { color: #1890ff !important; }
-.stat-value--green { color: #52c41a !important; }
-.stat-value--purple { color: #722ed1 !important; }
-.stat-value--orange { color: #fa8c16 !important; }
-
-/* =========================
-   功能卡片樣式
-========================= */
-.features-section {
-  padding: 80px 50px;
-  background: #fafafa;
-}
-
-.features-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.features-title {
-  margin-bottom: 16px;
-}
-
-.features-subtitle {
-  font-size: 1.1rem !important;
-  color: #666 !important;
-  max-width: 600px;
-  margin: 0 auto !important;
-}
-
-.feature-card {
-  text-align: center;
-  height: 100%;
-  transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.feature-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.feature-icon--blue { color: #1890ff; }
-.feature-icon--green { color: #52c41a; }
-.feature-icon--purple { color: #722ed1; }
-
-/* =========================
-   使用步驟樣式
-========================= */
-.steps-section {
-  padding: 80px 50px;
-  background: white;
-}
-
-.steps-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.steps-cta {
-  text-align: center;
-  margin-top: 40px;
-}
-
-.cta-button {
-  height: 50px !important;
-  padding-left: 32px !important;
-  padding-right: 32px !important;
-  border-radius: 8px !important;
-}
-
-/* =========================
-   認證頁面樣式
-========================= */
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 50px;
-  background: #f8fafc;
-}
-
-.auth-card {
-  width: 400px;
-  padding: 32px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.auth-logo {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #1890ff, #722ed1);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.auth-title {
-  margin-bottom: 8px !important;
-}
-
-.auth-subtitle {
-  color: rgba(0, 0, 0, 0.45) !important;
-}
-
-.auth-features {
-  margin-top: 16px;
-  padding: 16px;
-  background: #f6ffed;
-  border-radius: 8px;
-  border: 1px solid #b7eb8f;
-}
-
-.auth-features__title {
-  color: #52c41a !important;
-  font-weight: 500 !important;
-}
-
-.auth-features__item {
-  font-size: 0.9rem !important;
-  color: #666 !important;
-}
-
-/* =========================
-   儀表板樣式
-========================= */
-.dashboard-layout {
-  min-height: 100vh;
-}
-
-.dashboard-sidebar {
-  background: white;
-}
-
-.sidebar-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.sidebar-title {
-  margin: 0 !important;
-  color: #1890ff !important;
-}
-
-.sidebar-menu {
-  border-right: 0 !important;
-}
-
-.dashboard-header {
-  padding: 0 24px !important;
-  background: #fff !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #f0f0f0 !important;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
-.header-toggle {
-  font-size: 16px !important;
-  width: 64px !important;
-  height: 64px !important;
-}
-
-.header-title {
-  margin: 0 !important;
-  margin-left: 16px !important;
-}
-
-.dashboard-content {
-  background: #f0f2f5 !important;
-}
-
-/* =========================
-   內容區域樣式
-========================= */
-.content-container {
-  padding: 24px;
-}
-
-.content-card {
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.content-card--center {
-  text-align: center;
-}
-
-.content-card--form {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-/* =========================
-   表單樣式
-========================= */
-.url-form {
-  margin-top: 16px;
-}
-
-.url-preview {
-  margin-bottom: 24px;
-}
-
-.preview-card {
-  background: #f6ffed !important;
-  border: 1px solid #b7eb8f !important;
-}
-
-.preview-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.preview-text {
-  color: #52c41a !important;
-  font-weight: 500 !important;
-}
-
-.preview-url {
-  color: #1890ff !important;
-}
-
-/* =========================
-   表格樣式
-========================= */
-.url-table-container {
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.url-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.url-link {
-  color: #1890ff !important;
-  font-weight: 500 !important;
-}
-
-.url-original {
-  font-size: 12px !important;
-  color: rgba(0, 0, 0, 0.45) !important;
-}
-
-/* =========================
-   活動面板樣式
-========================= */
-.activity-panel {
-  margin-top: 24px;
-}
-
-.rank-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.rank-avatar--gold { background-color: #faad14 !important; }
-.rank-avatar--silver { background-color: #d9d9d9 !important; }
-.rank-avatar--bronze { background-color: #fa8c16 !important; }
-.rank-avatar--default { background-color: #1890ff !important; }
-
-/* =========================
-   底部樣式
-========================= */
-.app-footer {
-  text-align: center;
-  background: #001529 !important;
-  color: white !important;
-  padding: 40px 50px !important;
-}
-
-.footer-links {
-  margin-bottom: 20px;
-}
-
-.footer-link {
-  color: white !important;
-  cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.footer-link:hover {
-  opacity: 1 !important;
-  color: white !important;
-}
-
-.footer-copyright {
-  color: rgba(255,255,255,0.6) !important;
-}
-
-/* =========================
-   響應式設計
-========================= */
-@media (max-width: 768px) {
-  .navigation-header {
-    padding: 0 20px;
-  }
-  
-  .hero-section {
-    padding: 60px 20px;
-  }
-  
-  .hero-title {
-    font-size: 2.5rem !important;
-  }
-  
-  .stats-section,
-  .features-section,
-  .steps-section {
-    padding: 60px 20px;
-  }
-  
-  .stats-grid {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .auth-container {
-    padding: 20px;
-  }
-  
-  .auth-card {
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .content-container {
-    padding: 16px;
-  }
-  
-  .content-card {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem !important;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem !important;
-  }
-  
-  .stat-value {
-    font-size: 2rem !important;
-  }
-  
-  .feature-icon {
-    font-size: 36px;
-  }
-}
 
 /* =========================
    動畫效果

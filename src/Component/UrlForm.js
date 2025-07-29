@@ -112,9 +112,6 @@ const UrlForm = ({
         description: values.description || '',
         shortCode: code,
         originalUrl: values.originalUrl,
-        userId: user.uid,
-        userEmail: user.email,
-        clicks: 0,
         tags: selectedTags || []
       });
 
