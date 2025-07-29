@@ -1,5 +1,5 @@
 // src/Component/UrlForm.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Form, 
   Input, 
@@ -7,11 +7,14 @@ import {
   Space, 
   Typography, 
   Card,
-  message 
+  message,
+  Select,
+  Tag,
+  Divider
 } from 'antd';
-import { PlusOutlined, CopyOutlined } from '@ant-design/icons';
+import { PlusOutlined, CopyOutlined, TagOutlined } from '@ant-design/icons';
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from '../firebaseAuth/firebase';
+import { db, getUserTags, updateTagUrlCount } from '../firebaseAuth/firebase';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -31,6 +34,8 @@ const UrlForm = ({
   const [success, setSuccess] = useState(false);
   const [shortUrl, setShortUrl] = useState('');
   const [pastOriginalUrl, setPastOriginalUrl] = useState('');
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
 
   // 生成隨機代碼
   const generateRandomCode = () => {
@@ -48,6 +53,29 @@ const UrlForm = ({
     const urlSnap = await getDoc(urlRef);
     return urlSnap.exists();
   };
+
+  // 載入用戶標籤
+  const loadTags = async () => {
+    if (!user || !user.uid) {
+      return;
+    }
+    
+    try {
+      const result = await getUserTags(user.uid);
+      if (result.success) {
+        setTags(result.tags);
+      }
+    } catch (error) {
+      console.error('載入標籤失敗:', error);
+    }
+  };
+
+  // 組件載入時載入標籤
+  useEffect(() => {
+    if (user && user.uid) {
+      loadTags();
+    }
+  }, [user]);
 
   // 處理表單提交
   const handleSubmit = async (values) => {
@@ -84,10 +112,18 @@ const UrlForm = ({
         description: values.description || '',
         shortCode: code,
         originalUrl: values.originalUrl,
-        // userId: user.uid,
-        // userEmail: user.email,
-        // clicks: 0
+        userId: user.uid,
+        userEmail: user.email,
+        clicks: 0,
+        tags: selectedTags || []
       });
+
+      // 更新標籤的 URL 計數
+      if (selectedTags && selectedTags.length > 0) {
+        for (const tagId of selectedTags) {
+          await updateTagUrlCount(tagId, 1);
+        }
+      }
 
       // 設定成功狀態
       setSuccess(true);
@@ -142,6 +178,7 @@ const UrlForm = ({
     setSuccess(false);
     setShortUrl('');
     setPastOriginalUrl('');
+    setSelectedTags([]);
   };
 
   return (
@@ -233,6 +270,49 @@ const UrlForm = ({
         </Form.Item>
 
         <Form.Item
+          label={
+            <Space>
+              <TagOutlined />
+              標籤（選填）
+            </Space>
+          }
+          name="tags"
+          extra={`為您的短網址添加標籤，方便分類和篩選。在側邊欄可以管理標籤。(當前標籤數量: ${tags.length})`}
+        >
+          <Select
+            mode="multiple"
+            placeholder="選擇標籤"
+            size="large"
+            value={selectedTags}
+            onChange={setSelectedTags}
+            optionLabelProp="label"
+            maxTagCount="responsive"
+            notFoundContent={tags.length === 0 ? '還沒有創建標籤，請先到標籤管理頁面創建' : '沒有找到標籤'}
+          >
+            {tags.map(tag => (
+              <Select.Option 
+                key={tag.id} 
+                value={tag.id}
+                label={
+                  <Tag color={tag.color} style={{ margin: 0 }}>
+                    {tag.name}
+                  </Tag>
+                }
+              >
+                <Tag color={tag.color} style={{ margin: 0 }}>
+                  {tag.name}
+                </Tag>
+                {tag.description && (
+                  <span style={{ marginLeft: 8, color: '#999', fontSize: '12px' }}>
+                    {tag.description}
+                  </span>
+                )}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
           label="原始網址"
           name="originalUrl"
           rules={[
@@ -305,6 +385,7 @@ const UrlForm = ({
         <div style={{ fontSize: '14px', color: '#666' }}>
           <p><strong>描述：</strong>幫助您記住此連結的用途</p>
           <p><strong>短代碼：</strong>自訂易記的代碼，留空將自動生成</p>
+          <p><strong>標籤：</strong>為短網址添加標籤，方便分類管理</p>
           <p><strong>原始網址：</strong>要縮短的完整網址，必須包含 http:// 或 https://</p>
         </div>
       </Card>

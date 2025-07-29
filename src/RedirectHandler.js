@@ -7,7 +7,6 @@ import { db } from './firebaseAuth/firebase';
 
 const RedirectHandler = () => {
   const { shortCode } = useParams();
-  console.log(shortCode);
   const navigate = useNavigate();  
 
   useEffect(() => {
@@ -16,7 +15,6 @@ const RedirectHandler = () => {
           // 獲取短網址文檔
           const urlRef = doc(db, 'urlInfo', shortCode);
           const urlSnap = await getDoc(urlRef);
-          console.log(urlSnap.data());
   
           if (urlSnap.exists()) {
         //     // 更新訪問計數

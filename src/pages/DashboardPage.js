@@ -7,6 +7,8 @@ import StatisticsCards from '../Component/StatisticsCards';
 import { ActivityPanel } from '../Component/ActivityLists';
 import UrlForm from '../Component/UrlForm';
 import UrlTable from '../Component/UrlTable';
+import TagStatistics from '../Component/TagStatistics';
+import TagManagementPage from './TagManagementPage';
 
 const { Content } = Layout;
 
@@ -18,9 +20,11 @@ const DashboardPage = ({
   user,
   urls,
   stats,
+  loading,
   onCreateUrl,
   onDeleteUrl,
-  onUpdateUrl,  // 新增這個 prop
+  onUpdateUrl,
+  onRefresh, // 新增重新整理函數 prop
   onNotificationClick,
   onLogout,
   onProfile,
@@ -32,6 +36,7 @@ const DashboardPage = ({
       'overview': '儀表板總覽',
       'create': '新增短網址',
       'links': '我的連結',
+      'tags': '標籤管理',
       'analytics': '分析報告',
       'settings': '系統設定'
     };
@@ -60,9 +65,9 @@ const DashboardPage = ({
           <div className="content-container">
             <div className="content-card content-card--form">
               <UrlForm 
-               onSubmit={onCreateUrl}
-               user
-               />
+                onSubmit={onCreateUrl}
+                user={user}
+              />
             </div>
           </div>
         );
@@ -74,17 +79,29 @@ const DashboardPage = ({
               <UrlTable 
                 urls={urls}
                 onDelete={onDeleteUrl}
-                onView={(record) => console.log('查看:', record)}
+                onUpdate={onUpdateUrl}
+                onRefresh={onRefresh}
+                loading={loading}
+                onView={(record) => {}}
+                user={user}
               />
             </div>
+          </div>
+        );
+        
+      case 'tags':
+        return (
+          <div className="content-container">
+            <TagManagementPage user={user} />
           </div>
         );
         
       case 'analytics':
         return (
           <div className="content-container">
-            <div className="content-card content-card--center">
-              <h2>分析功能開發中</h2>
+            <TagStatistics user={user} urls={urls} />
+            <div className="content-card content-card--center" style={{ marginTop: 24 }}>
+              <h3>更多分析功能開發中</h3>
               <p>詳細的點擊分析、地理位置統計、設備分析等功能正在開發中...</p>
             </div>
           </div>

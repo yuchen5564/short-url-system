@@ -7,6 +7,7 @@ import {
   LinkOutlined,
   BarChartOutlined,
   SettingOutlined,
+  TagOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -33,6 +34,11 @@ const DashboardSidebar = ({
       key: 'links',
       icon: <LinkOutlined />,
       label: '我的連結',
+    },
+    {
+      key: 'tags',
+      icon: <TagOutlined />,
+      label: '標籤管理',
     },
     {
       key: 'analytics',

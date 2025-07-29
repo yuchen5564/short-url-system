@@ -47,7 +47,6 @@ const App = () => {
   // Firebase 身分驗證狀態監聽
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log('Firebase Auth State Changed:', firebaseUser);
       setAuthLoading(false);
       
       if (firebaseUser) {
@@ -94,6 +93,7 @@ const App = () => {
   const fetchUserUrls = async () => {
     if (!firebaseUser) return;
     
+    setLoading(true);
     try {
       const urlsQuery = query(
         collection(db, "urlInfo"), 
@@ -111,10 +111,12 @@ const App = () => {
       }));
       
       setUrls(urlsData);
-      console.log('載入 URLs:', urlsData);
+      message.success(`資料已重新載入`);
     } catch (error) {
       console.error('載入 URLs 失敗:', error);
       message.error('載入數據失敗');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,7 +138,6 @@ const App = () => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      console.log('登入資訊:', values);
       
       const result = await signIn(values.email, values.password);
       if (result.error) {
@@ -157,7 +158,6 @@ const App = () => {
   const handleRegister = async (values) => {
     setLoading(true);
     try {
-      console.log('註冊資訊:', values);
       
       // 創建新用戶
       const userCredential = await createUserWithEmailAndPassword(
@@ -201,7 +201,6 @@ const App = () => {
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
-      console.log('用戶登出:', user?.email);
       
       await signOut(auth);
       
@@ -223,7 +222,6 @@ const App = () => {
   const handleUpdateProfile = async (values) => {
     setProfileLoading(true);
     try {
-      console.log('更新用戶資料:', values);
       
       if (firebaseUser) {
         // 更新 Firebase 用戶資料
@@ -313,7 +311,7 @@ const App = () => {
     setActiveKey('settings');
   };
 
-  const handleUpdateUrl = (updatedData) => {
+  const handleUpdateUrl = async (updatedData) => {
     // 更新本地狀態中的 URL 數據
     setUrls(prevUrls => 
       prevUrls.map(url => 
@@ -321,7 +319,9 @@ const App = () => {
       )
     );
     
-    console.log('URL 資料已更新:', updatedData);
+    // 重新載入 URL 列表以確保數據同步
+    await fetchUserUrls();
+    
   };
   
 
@@ -343,8 +343,11 @@ const App = () => {
           user={user}
           urls={urls}
           stats={stats}
-          onCreateUrl={handleCreateUrl}  // 確保傳入這個函數
+          loading={loading}
+          onCreateUrl={handleCreateUrl}
           onDeleteUrl={handleDeleteUrl}
+          onUpdateUrl={handleUpdateUrl}
+          onRefresh={fetchUserUrls}
           onNotificationClick={handleNotificationClick}
           onLogout={() => setShowLogoutModal(true)}
           onProfile={() => setShowProfileModal(true)}
@@ -393,8 +396,11 @@ const App = () => {
             user={user}
             urls={urls}
             stats={stats}
-            onCreateUrl={handleCreateUrl}  // 確保傳入這個函數
+            loading={loading}
+            onCreateUrl={handleCreateUrl}
             onDeleteUrl={handleDeleteUrl}
+            onUpdateUrl={handleUpdateUrl}
+            onRefresh={fetchUserUrls}
             onNotificationClick={handleNotificationClick}
             onLogout={() => setShowLogoutModal(true)}
             onProfile={() => setShowProfileModal(true)}

@@ -13,7 +13,8 @@ import {
   Col,
   Card,
   message,
-  Statistic
+  Statistic,
+  Select
 } from 'antd';
 import { 
   EditOutlined, 
@@ -21,10 +22,11 @@ import {
   ExportOutlined,
   CalendarOutlined,
   BarChartOutlined,
-  LinkOutlined
+  LinkOutlined,
+  TagOutlined
 } from '@ant-design/icons';
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from '../firebaseAuth/firebase';
+import { db, getUserTags, updateTagUrlCount } from '../firebaseAuth/firebase';
 import dayjs from 'dayjs';
 
 const { Text, Title } = Typography;
@@ -35,11 +37,28 @@ const UrlDetailModal = ({
   onCancel, 
   urlData,
   onUpdate,
-  loading = false 
+  loading = false,
+  user // 新增用戶 prop
 }) => {
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  // 載入用戶標籤
+  const loadTags = async () => {
+    if (!user) return;
+    
+    try {
+      const result = await getUserTags(user.uid);
+      if (result.success) {
+        setTags(result.tags);
+      }
+    } catch (error) {
+      console.error('載入標籤失敗:', error);
+    }
+  };
 
   useEffect(() => {
     if (visible && urlData) {
@@ -47,9 +66,16 @@ const UrlDetailModal = ({
         description: urlData.description || '',
         originalUrl: urlData.originalUrl || ''
       });
+      setSelectedTags(urlData.tags || []);
       setEditing(false);
     }
   }, [visible, urlData, form]);
+
+  useEffect(() => {
+    if (visible && user) {
+      loadTags();
+    }
+  }, [visible, user]);
 
   const handleUpdate = async (values) => {
     if (!urlData?.id) {
@@ -59,13 +85,29 @@ const UrlDetailModal = ({
 
     setUpdating(true);
     try {
+      const oldTags = urlData.tags || [];
+      const newTags = selectedTags;
+
+      // 計算標籤變化
+      const removedTags = oldTags.filter(tagId => !newTags.includes(tagId));
+      const addedTags = newTags.filter(tagId => !oldTags.includes(tagId));
+
       // 更新 Firestore 文檔
       const docRef = doc(db, "urlInfo", urlData.id);
       await updateDoc(docRef, {
         description: values.description,
         originalUrl: values.originalUrl,
+        tags: selectedTags,
         lastModified: dayjs().format('YYYY/MM/DD HH:mm:ss')
       });
+
+      // 更新標籤計數
+      for (const tagId of removedTags) {
+        await updateTagUrlCount(tagId, -1);
+      }
+      for (const tagId of addedTags) {
+        await updateTagUrlCount(tagId, 1);
+      }
 
       message.success('連結資料更新成功');
       setEditing(false);
@@ -76,6 +118,7 @@ const UrlDetailModal = ({
           ...urlData,
           description: values.description,
           originalUrl: values.originalUrl,
+          tags: selectedTags,
           lastModified: dayjs().format('YYYY/MM/DD HH:mm:ss')
         });
       }
@@ -272,6 +315,76 @@ const UrlDetailModal = ({
                 >
                   {urlData.originalUrl}
                 </Text>
+              </div>
+            )}
+          </Form.Item>
+
+          <Form.Item
+            label={
+              <Space>
+                <TagOutlined />
+                標籤
+              </Space>
+            }
+          >
+            {editing ? (
+              <Select
+                mode="multiple"
+                placeholder="選擇標籤"
+                size="large"
+                value={selectedTags}
+                onChange={setSelectedTags}
+                optionLabelProp="label"
+                maxTagCount="responsive"
+                style={{ width: '100%' }}
+              >
+                {tags.map(tag => (
+                  <Select.Option 
+                    key={tag.id} 
+                    value={tag.id}
+                    label={
+                      <Tag color={tag.color} style={{ margin: 0 }}>
+                        {tag.name}
+                      </Tag>
+                    }
+                  >
+                    <Tag color={tag.color} style={{ margin: 0 }}>
+                      {tag.name}
+                    </Tag>
+                    {tag.description && (
+                      <span style={{ marginLeft: 8, color: '#999', fontSize: '12px' }}>
+                        {tag.description}
+                      </span>
+                    )}
+                  </Select.Option>
+                ))}
+              </Select>
+            ) : (
+              <div style={{ 
+                padding: 12,
+                background: '#fafafa',
+                borderRadius: 8,
+                border: '1px solid #d9d9d9',
+                minHeight: 40
+              }}>
+                {(urlData.tags && urlData.tags.length > 0) ? (
+                  <Space wrap>
+                    {urlData.tags.map(tagId => {
+                      const tag = tags.find(t => t.id === tagId);
+                      return tag ? (
+                        <Tag key={tagId} color={tag.color}>
+                          {tag.name}
+                        </Tag>
+                      ) : (
+                        <Tag key={tagId} color="default">
+                          未知標籤
+                        </Tag>
+                      );
+                    })}
+                  </Space>
+                ) : (
+                  <Text type="secondary">無標籤</Text>
+                )}
               </div>
             )}
           </Form.Item>

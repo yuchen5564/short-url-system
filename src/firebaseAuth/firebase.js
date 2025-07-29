@@ -44,11 +44,9 @@ const storage = getStorage(app);
 // 身分驗證函數
 const signIn = async (email, password) => {
   try {
-    console.log("登入中，信箱:", email);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    console.log("登入成功:", user.uid);
     return { success: true, user };
   } catch (error) {
     console.error("登入失敗:", error);
@@ -58,7 +56,6 @@ const signIn = async (email, password) => {
 
 const signUp = async (email, password, displayName) => {
   try {
-    console.log("註冊中，信箱:", email);
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
@@ -70,7 +67,6 @@ const signUp = async (email, password, displayName) => {
     // 發送驗證信件（可選）
     // await sendEmailVerification(user);
     
-    console.log("註冊成功:", user.uid);
     return { success: true, user };
   } catch (error) {
     console.error("註冊失敗:", error);
@@ -81,7 +77,6 @@ const signUp = async (email, password, displayName) => {
 const logOut = async () => {
   try {
     await signOut(auth);
-    console.log("登出成功");
     return { success: true };
   } catch (error) {
     console.error("登出失敗:", error);
@@ -92,7 +87,6 @@ const logOut = async () => {
 const resetPassword = async (email) => {
   try {
     await sendPasswordResetEmail(auth, email);
-    console.log("密碼重設信件已發送");
     return { success: true };
   } catch (error) {
     console.error("發送密碼重設信件失敗:", error);
@@ -110,7 +104,6 @@ const createShortUrl = async (urlData) => {
       status: 'active'
     });
     
-    console.log("短網址創建成功:", docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("創建短網址失敗:", error);
@@ -120,19 +113,26 @@ const createShortUrl = async (urlData) => {
 
 const getUserUrls = async (userId) => {
   try {
+    if (!userId) {
+      return { success: true, urls: [] };
+    }
+
     const q = query(
       collection(db, "urlInfo"),
-      where("userId", "==", userId),
-      orderBy("createdAt", "desc")
+      where("userId", "==", userId)
     );
     
     const querySnapshot = await getDocs(q);
     const urls = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })).sort((a, b) => {
+      // 客戶端排序，最新的在前
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.ptime || 0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.ptime || 0);
+      return dateB - dateA;
+    });
     
-    console.log("載入用戶 URLs:", urls.length);
     return { success: true, urls };
   } catch (error) {
     console.error("載入 URLs 失敗:", error);
@@ -143,7 +143,6 @@ const getUserUrls = async (userId) => {
 const deleteShortUrl = async (urlId) => {
   try {
     await deleteDoc(doc(db, "urlInfo", urlId));
-    console.log("短網址刪除成功:", urlId);
     return { success: true };
   } catch (error) {
     console.error("刪除短網址失敗:", error);
@@ -154,7 +153,6 @@ const deleteShortUrl = async (urlId) => {
 const updateShortUrl = async (urlId, updateData) => {
   try {
     await updateDoc(doc(db, "urlInfo", urlId), updateData);
-    console.log("短網址更新成功:", urlId);
     return { success: true };
   } catch (error) {
     console.error("更新短網址失敗:", error);
@@ -171,10 +169,93 @@ const incrementUrlClicks = async (urlId) => {
       lastClicked: new Date()
     });
     
-    console.log("點擊數更新成功:", urlId);
     return { success: true };
   } catch (error) {
     console.error("更新點擊數失敗:", error);
+    return { error: error.message };
+  }
+};
+
+// 標籤管理函數
+const createTag = async (userId, tagData) => {
+  try {
+    if (!userId) {
+      return { error: "用戶ID不能為空" };
+    }
+
+    const docRef = await addDoc(collection(db, "tags"), {
+      ...tagData,
+      userId,
+      createdAt: new Date(),
+      urlCount: 0
+    });
+    
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("創建標籤失敗:", error);
+    return { error: error.message };
+  }
+};
+
+const getUserTags = async (userId) => {
+  try {
+    if (!userId) {
+      return { success: true, tags: [] };
+    }
+
+    const q = query(
+      collection(db, "tags"),
+      where("userId", "==", userId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const tags = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })).sort((a, b) => {
+      // 客戶端排序，最新的在前
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+    
+    return { success: true, tags };
+  } catch (error) {
+    console.error("載入標籤失敗:", error);
+    return { error: error.message };
+  }
+};
+
+const updateTag = async (tagId, updateData) => {
+  try {
+    await updateDoc(doc(db, "tags", tagId), updateData);
+    return { success: true };
+  } catch (error) {
+    console.error("更新標籤失敗:", error);
+    return { error: error.message };
+  }
+};
+
+const deleteTag = async (tagId) => {
+  try {
+    await deleteDoc(doc(db, "tags", tagId));
+    return { success: true };
+  } catch (error) {
+    console.error("刪除標籤失敗:", error);
+    return { error: error.message };
+  }
+};
+
+const updateTagUrlCount = async (tagId, increment_value = 1) => {
+  try {
+    const tagRef = doc(db, "tags", tagId);
+    await updateDoc(tagRef, {
+      urlCount: increment(increment_value)
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error("更新標籤URL計數失敗:", error);
     return { error: error.message };
   }
 };
@@ -198,5 +279,12 @@ export {
   getUserUrls,
   deleteShortUrl,
   updateShortUrl,
-  incrementUrlClicks
+  incrementUrlClicks,
+  
+  // 標籤管理函數
+  createTag,
+  getUserTags,
+  updateTag,
+  deleteTag,
+  updateTagUrlCount
 };
